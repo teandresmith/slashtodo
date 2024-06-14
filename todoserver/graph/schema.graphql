@@ -1,0 +1,79 @@
+directive @goField(
+  forceResolver: Boolean
+  name: String
+  omittable: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+scalar Time
+
+"Possible statuses for a todo task"
+enum TodoStatus {
+  OPEN
+  CLOSED
+}
+
+type Todo {
+  "ID of the todo"
+  id: ID!
+  "Name of the todo"
+  name: String!
+  "Description for the todo"
+  description: String
+  "Date the todo should be completed by"
+  dueDate: Time
+  "Current status of the todo"
+  status: TodoStatus!
+  "Flag that indicates if the todo is currently archived"
+  isArchived: Boolean!
+  "Time the todo was created at"
+  createdAt: Time!
+  "Time the todo was last updated at"
+  updatedAt: Time!
+  "Time the todo was deleted at"
+  deletedAt: Time
+}
+
+input TodoFilter {
+  status: TodoStatus
+  isArchived: Boolean
+  isOverdue: Boolean
+  isDeleted: Boolean
+}
+
+type Query {
+  "Fetches a single todo"
+  todo(id: ID!): Todo!
+  "Fetches a non-paginated list of todos"
+  todos(filter: TodoFilter): [Todo!]!
+}
+
+input CreateTodoInput {
+  "Desired name of the todo"
+  name: String!
+  "Desired description of the todo"
+  description: String
+  "Date the todo is expected to be completed by"
+  dueDate: Time
+}
+
+input UpdateTodoInput {
+  "Desired name of the todo"
+  name: String
+  "Desired description of the todo"
+  description: String @goField(omittable: true)
+  "Desired target date for the todo"
+  dueDate: Time @goField(omittable: true)
+  "New status for the todo"
+  status: TodoStatus
+  "Should the status be archived?"
+  isArchived: Boolean
+}
+
+type Mutation {
+  "Creates a single todo"
+  createTodo(input: CreateTodoInput!): Todo!
+  "Updates a single todo"
+  updateTodo(id: ID!, input: UpdateTodoInput!): Todo!
+  "Deletes a single todo"
+  deleteTodo(id: ID!): Todo!
+}
